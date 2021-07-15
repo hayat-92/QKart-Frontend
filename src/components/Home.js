@@ -1,4 +1,4 @@
-import { Button } from "antd";
+import { Button, Image} from "antd";
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";

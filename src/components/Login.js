@@ -28,15 +28,184 @@ class Login extends React.Component {
     };
   }
 
+  // TODO: CRIO_TASK_MODULE_LOGIN - Fetch the API response
+  /**
+   * Perform the API call over the network and return the response
+   *
+   * @returns {{ success: boolean, token: string, username: string, balance: number }|undefined}
+   *    The response JSON object
+   *
+   * -    Set the loading state variable to true
+   * -    Perform the API call via a fetch call: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+   *      - The call must be made asynchronously using Promises or async/await
+   *      - The call must handle any errors thrown from the fetch call
+   *      - Parse the result as JSON
+   * -    Set the loading state variable to false once the call has completed
+   * -    Call the validateResponse(errored, response) function defined previously
+   * -    If response passes validation, return the response object
+   *
+   * Example for successful response from backend:
+   * HTTP 200
+   * {
+   *      "success": true,
+   *      "token": "testtoken",
+   *      "username": "criodo",
+   *      "balance": 5000
+   * }
+   *
+   * Example for failed response from backend:
+   * HTTP 400
+   * {
+   *      "success": false,
+   *      "message": "Password is incorrect"
+   * }
+   */
+  performAPICall = async () => {
+    this.setState({
+      loading: true
+    })
 
-  // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement the login() function to display a message, "Login logic not implemented yet"
+    let flag = true;
+    try {
+      let url = `${config.endpoint}/auth/login`;
+      var raw_response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+          username: this.state.username,
+          password: this.state.password
+        }),
+        headers: {
+          "Content-type": "application/json"
+        }
+      });
+
+      var response = await raw_response.json();
+    } catch (error) {
+      flag = false;
+    }
+
+    this.setState({
+      loading: false
+    })
+
+    if (this.validateResponse(flag, response)) {
+      return response;
+    }
+  };
+
+  // TODO: CRIO_TASK_MODULE_LOGIN - Validate the input
+  /**
+   * Validate the input values so that any bad or illegal values are not passed to the backend.
+   *
+   * @returns {boolean}
+   *    Whether validation has passed or not
+   *
+   * Return false if any validation condition fails, otherwise return true.
+   * -    Check that username field is not an empty value
+   * -    Check that password field is not an empty value
+   */
+  validateInput = () => {
+    let username = this.state.username, password = this.state.password;
+    let validate = true;
+    if (username.length == 0) {
+      message.error("Username is a required field!");
+      validate = false;
+    }
+
+    if (password.length == 0) {
+      message.error("Password is required field!")
+      validate = false;
+    }
+
+
+
+    return validate;
+  };
+
+  // TODO: CRIO_TASK_MODULE_LOGIN - Check the API response
+  /**
+   * Check the response of the API call to be valid and handle any failures along the way
+   *
+   * @param {boolean} errored
+   *    Represents whether an error occurred in the process of making the API call itself
+   * @param {{ success: boolean, message?: string, token?: string, username?: string }} response
+   *    The response JSON object from API call which may contain further success or error messages
+   * @returns {boolean}
+   *    Whether validation has passed or not
+   *
+   * If the API call itself encounters an error, errored flag will be true.
+   * If the backend returns an error, then success field will be false and message field will have a string with error details to be displayed.
+   * When there is an error in the API call itself, display a generic error message and return false.
+   * When there is an error returned by backend, display the given message field and return false.
+   * When there is no error and API call is successful, return true.
+   */
+  validateResponse = (errored, response) => {
+    console.log(response);
+    console.log(errored);
+    if (!errored) {
+      return false;
+    }
+
+    if (!response.success) {
+      message.error(response.message);
+      return false;
+    }
+
+    return true;
+  };
+
+  // TODO: CRIO_TASK_MODULE_LOGIN - Persist user's login information
+  /**
+   * Store the login information so that it can be used to identify the user in subsequent API calls
+   *
+   * @param {string} token
+   *    API token used for authentication of requests after logging in
+   * @param {string} username
+   *    Username of the logged in user
+   * @param {string} balance
+   *    Wallet balance amount of the logged in user
+   *
+   * Make use of localStorage: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+   * -    `token` field in localStorage can be used to store the Oauth token
+   * -    `username` field in localStorage can be used to store the username that the user is logged in as
+   * -    `balance` field in localStorage can be used to store the balance amount in the user's wallet
+   */
+  persistLogin = (token, username, balance) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", username);
+    localStorage.setItem("balance", balance);
+
+  };
+
+  // TODO: CRIO_TASK_MODULE_LOGIN - Implement the login function
   /**
    * Definition for login handler
    * This is the function that is called when the user clicks on the login button or submits the login form
-   *    - Display a message, "Login logic not implemented yet"
+   * -    Call the previously defined validateInput() function and check that is returns true, i.e. the input values pass validation
+   * -    Call the previously defined performAPICall() function asynchronously and capture the returned value in a variable
+   * -    If the returned value exists,
+   *      -   Call the previously defined persistLogin(token, username, balance) function
+   *      -   Clear the input fields
+   *      -   Display a success message
+   *      -   Redirect the user to the "/products" page
    */
+
   login = async () => {
-    message.info("Login logic not implemented yet");
+    let pass=this.validateInput();
+    if(pass){
+      var val=await this.performAPICall();
+    }
+
+    if(typeof val !== undefined){
+        // let val=JSON.parse(jsval);
+        this.persistLogin(val.token, val.username, val.balance);
+        this.setState({ username: "", password: "" });
+        message.success("Successfull!");
+        // return <Redirect from= to="/products" />
+        this.props.history.push('/products')
+      
+
+    }
   };
 
   /**

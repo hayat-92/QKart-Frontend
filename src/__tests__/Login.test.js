@@ -85,3 +85,61 @@ describe('Check UI for Login page component (UI)', () => {
 });
 
 
+describe('Test curl commmand in login.sh for login', () => {
+    let curl;
+    try {
+        curl = fs.readFileSync('login.sh', 'utf8');
+        // console.log(curl);
+    } catch (e) {
+        console.log('Error:', e.stack);
+    }
+
+    test('Check if request is of type POST', () => {
+        const postPattern = /(?<=-X\s*)POST/
+        const isPOST = postPattern.test(curl);
+        expect(isPOST).toBe(true);
+    });
+
+    test('Check if correct login API is called', () => {
+        const postPattern = /(\w+)?:8082\/api\/v1\/auth\/login/
+        const isPOST = postPattern.test(curl);
+        expect(isPOST).toBe(true);
+    });
+
+    test('Content-type header is set to application/json', () => {
+        const headerPattern = /(?<=-H\s*).Content-Type:\s*application\/json\s*./i
+        const isJSON = headerPattern.test(curl);
+        expect(isJSON).toBe(true);
+    });
+
+})
+
+describe('Check flow for Login page component (flow)', () => {
+    test('Login failure flow', () => {
+        loginComponent.setState({
+            username: '',
+            password: ''
+        });
+        loginComponent.instance().login();
+        expect(loginComponent.state('loading')).toBe(false);
+    });
+
+    test('Login success flow', async () => {
+        loginComponent.setState({
+            username: 'test123',
+            password: 'testpass'
+        });
+        await loginComponent.instance().login();
+        expect(localStorage.getItem('token')).toBe('testtoken');
+    });
+
+    test('Login api call changes loading state', () => {
+        expect(loginComponent.state('loading')).toBe(false);
+        loginComponent.setState({
+            username: 'test123',
+            password: 'testpass'
+        });
+        loginComponent.instance().login();
+        expect(loginComponent.state('loading')).toBe(true);
+    });
+});
