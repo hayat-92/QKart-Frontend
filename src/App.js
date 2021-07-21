@@ -1,9 +1,10 @@
 import "antd/dist/antd.css";
 import React, { useLayoutEffect } from "react";
-import { Route, Switch, useLocation, Redirect } from "react-router-dom";
+import { Route, Switch, useLocation } from "react-router-dom";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import Search from "./components/Search";
 import ipConfig from "./ipConfig.json";
 
 export const config = {
@@ -37,6 +38,11 @@ export default function App(props) {
         </Route>
 
         {/* <Redirect to="/login" /> */}
+        <Route path="/products">
+          <Search />
+        </Route>
+
+
         <Route path="/">
           <Home />
         </Route>

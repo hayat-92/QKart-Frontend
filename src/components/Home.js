@@ -1,4 +1,4 @@
-import { Button, Image} from "antd";
+import { Button } from "antd";
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";
@@ -26,6 +26,12 @@ export default function App() {
             <Link to="/login">
               <Button id="login-button" className="btn-block" type="primary" block={true}>
                 Login
+              </Button>
+            </Link>
+            
+            <Link to="/products">
+              <Button className="btn-block" type="primary" block={true}>
+                Browse Products
               </Button>
             </Link>
           </div>

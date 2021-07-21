@@ -8,6 +8,7 @@ export default class Header extends React.Component {
   };
 
   explore = () => {
+    console.log(this.props);
     this.props.history.push("/products");
   };
 
@@ -33,6 +34,9 @@ export default class Header extends React.Component {
           <img src="icon.svg" alt="QKart-icon"></img>
         </div>
 
+        {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display any child element passed to the component*/}
+        {this.props.children}
+        {/* <div>{this.props.children}</div> */}
 
 
         {/* Display links based on if the user's logged in or not */}

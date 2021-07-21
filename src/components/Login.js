@@ -191,21 +191,23 @@ class Login extends React.Component {
    */
 
   login = async () => {
-    let pass=this.validateInput();
-    if(pass){
-      var val=await this.performAPICall();
-    }
+    let pass = this.validateInput();
+    if (pass === true) {
+      var val = await this.performAPICall();
 
-    if(typeof val !== undefined){
+      if (typeof val !== undefined) {
         // let val=JSON.parse(jsval);
         this.persistLogin(val.token, val.username, val.balance);
         this.setState({ username: "", password: "" });
         message.success("Successfull!");
         // return <Redirect from= to="/products" />
         this.props.history.push('/products')
-      
 
+
+      }
     }
+
+
   };
 
   /**
