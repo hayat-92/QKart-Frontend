@@ -230,10 +230,14 @@ export default class Cart extends React.Component {
    * -    Call the previously defined getCart() function asynchronously and capture the returned value in a variable
    * -    If the returned value exists,
    *      -   Update items state variable with the response (optionally add the corresponding product object of that item as a sub-field)
+   * -    If the cart is being displayed from the checkout page, or the cart is empty,
+   *      -   Display an error message
+   *      -   Redirect the user to the products listing page
    */
   refreshCart = async () => {
     const cart = await this.getCart();
-
+    console.log(cart);
+    
     if (cart) {
       this.setState({
         items: cart.map((item) => ({
@@ -245,6 +249,9 @@ export default class Cart extends React.Component {
       });
     }
 
+    console.log(this.state.items)
+
+    // TODO: CRIO_TASK_MODULE_CHECKOUT - If the user visits "/checkout" directly and cart is empty, display an error message and redirect to the "/products" page
   };
 
   /**
@@ -257,13 +264,12 @@ export default class Cart extends React.Component {
   calculateTotal = () => {
     return this.state.items.length
       ? this.state.items.reduce(
-        (total, item) => total + item.product.cost * item.qty,
-        0
-      )
+          (total, item) => total + item.product.cost * item.qty,
+          0
+        )
       : 0;
   };
 
-  // TODO: CRIO_TASK_MODULE_CART - Implement a lifecycle method to populate the Cart when page is loaded
   /**
    * Function that runs when component has loaded
    * This is the function that is called when the page loads the cart component
