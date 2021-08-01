@@ -8,7 +8,6 @@ export default class Header extends React.Component {
   };
 
   explore = () => {
-    console.log(this.props);
     this.props.history.push("/products");
   };
 

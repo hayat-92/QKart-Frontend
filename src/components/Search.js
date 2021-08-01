@@ -1,8 +1,8 @@
-import { message, Input } from "antd";
-// import {Search as input} from 'antd';
+import { Input, message } from "antd";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { config } from "../App";
+import Cart from "./Cart";
 import Header from "./Header";
 import Product from "./Product";
 import { Row, Col } from "antd";
@@ -26,6 +26,8 @@ import {
  * @class Search component handles the Products list page UI and functionality
  * 
  * Contains the following fields
+ * @property {React.RefObject} cartRef 
+ *    Reference to Cart component (to trigger certain methods within the cart component)
  * @property {number} debounceTimeout 
  *    Holds the return value from setTimeout() for the search bar debouncer
  * @property {Product[]} products 
@@ -42,6 +44,7 @@ class Search extends React.Component {
     super();
     this.debounceTimeout = 0;
     this.products = [];
+    this.myRef = React.createRef();
     this.state = {
       loading: false,
       loggedIn: false,
@@ -173,8 +176,8 @@ class Search extends React.Component {
 
   componentDidMount() {
     this.getProducts();
-    if(Boolean(window.localStorage.getItem('token'))){
-      this.setState({loggedIn:true});
+    if (Boolean(window.localStorage.getItem('token'))) {
+      this.setState({ loggedIn: true });
     }
 
   }
@@ -195,12 +198,12 @@ class Search extends React.Component {
    * -    The search filtering should not take in to account the letter case of the search text or name/category fields
    */
   search = (text) => {
-    let newFilt=this.products.filter((value, index, array)=>{
+    let newFilt = this.products.filter((value, index, array) => {
       return value.name.toLowerCase().includes(text.toLowerCase());
     })
 
     console.log(newFilt);
-    this.setState({filteredProducts:[...newFilt]});
+    this.setState({ filteredProducts: [...newFilt] });
   }
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement the debounceSearch() method
@@ -230,11 +233,11 @@ class Search extends React.Component {
 
     // timeout=setTimeout(latter, 3000);
 
-    let val=event.target.value;
-    if(this.debounceTimeout){
+    let val = event.target.value;
+    if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout);
     }
-    this.debounceTimeout=setTimeout(()=>{
+    this.debounceTimeout = setTimeout(() => {
       this.search(val);
     }, 300);
 
@@ -262,8 +265,17 @@ class Search extends React.Component {
           product={product}
           addToCart={() => {
             if (this.state.loggedIn) {
-              message.info("Cart functionality not implemented yet");
-            }else{
+              console.log(this.myRef.current)
+              // message.info("Cart functionality not implemented yet");
+
+              let qty = 1;
+              let fromAddToCart = true;
+              let pushCart = this.myRef.current.pushToCart;
+              pushCart(product._id, qty, fromAddToCart);
+              this.myRef.current.refreshCart();
+              console.log("getProductElement_called")
+
+            } else {
               this.props.history.push('/login');
             }
           }}
@@ -278,6 +290,7 @@ class Search extends React.Component {
    * JSX and HTML goes here
    * We require a text field as the search (optionally along with a button for submitting the search query)
    * We also iterate over the filteredProducts list and display each product as a component
+   * Display Cart sidebar component if user is logged in
    */
   render() {
     return (
@@ -285,11 +298,11 @@ class Search extends React.Component {
         {/* Display Header with Search bar */}
         <Header history={this.props.history}>
           {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
-          <Input.Search placeholder="Search Product" onChange={(event)=>{
+          <Input.Search placeholder="Search Product" onChange={(event) => {
             this.debounceSearch(event)
-          }} onSearch={(value)=>{
+          }} onSearch={(value) => {
             this.search(value)
-          }} enterButton  />
+          }} enterButton />
 
         </Header>
 
@@ -298,6 +311,9 @@ class Search extends React.Component {
           {/* Display products */}
           <Col
             xs={{ span: 24 }}
+
+            md={this.state.loggedIn ? { span: 18 } : { span: 24 }}
+
           >
             <div className="search-container ">
               {/* Display each product item wrapped in a Col component */}
@@ -316,6 +332,19 @@ class Search extends React.Component {
           </Col>
 
           {/* Display cart */}
+          {this.state.loggedIn && this.products.length && (
+            <Col
+              xs={{ span: 24 }}
+              md={{ span: 6 }}
+
+              className="search-cart"
+            >
+              <div>
+                {/* TODO: CRIO_TASK_MODULE_CART - Add a Cart to the products page */}
+                <Cart history={this.props.history} products={this.products} ref={this.myRef} token={window.localStorage.getItem("token")} />
+              </div>
+            </Col>
+          )}
         </Row>
 
         {/* Display the footer */}
